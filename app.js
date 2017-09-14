@@ -2,8 +2,16 @@ const {app, BrowserWindow} = require('electron')
 const path = require('path')
 const url = require('url')
 const queries = require('./queries')
-const express = require('express')
-const routes = express()
+const WebSocket = require('ws')
+
+const wss = new WebSocket.Server({ port: 6050 });
+
+wss.on('connection', function connection(ws) {
+  ws.on('message', function incoming(message) {
+    console.log(message)
+    ws.send('something');
+  });
+});
 
 let win
 
