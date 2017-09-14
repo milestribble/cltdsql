@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+      *{
+        /*border: 1px solid red;*/
+        outline: none;
+        background-color: green;
+        font-family: AppleSDGothicNeo-Light;
+        font-weight: lighter;
+        color: white;
+        box-sizing: border-box;
+      }
+      .templates {
+        display: none;
+      }
+      .task {
+        margin-bottom: 5px;
+      }
+      .task_toggle {
+        float: left;
+        width: 15px;
+        height: 15px;
+        border: rgba(255, 255, 255, 0.4) solid 1px;
+        margin-right: 5px;
+      }
+      .task_toggle_bold {
+        border: rgba(255, 255, 255, 0.7) solid 2px;
+        background-color: rgba(255, 255, 255, 0.4)
+      }
+      .task_entry {
+        border-bottom: rgba(255, 255, 255, 0.4) solid 1px;
+        overflow: hidden;
+        color: rgba(255, 255, 255, 0.5);
+      }
+      .task_entry_bold, .task_entry_bold_persist {
+        color: rgba(255, 255, 255, 0.7);
+        border-bottom: rgba(255, 255, 255, 0.7) solid 1px;
+      }
+      .footer > div {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.5em;
+        margin-right: 5px;
+        display: inline;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="templates">
+      <div class="task">
+        <div class="task_toggle"></div>
+        <div contenteditable class="task_entry" rows="1"></div>
+      </div>
+    </div>
+    <div id="stuff">
+
+    </div>
+    <div class="footer">
+     <div>-</div><div onclick="add()">+</div>
+    </div>
+    <script type="text/javascript" src="bundle.js"></script>
+  </body>
+</html>
