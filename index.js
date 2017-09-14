@@ -22,8 +22,9 @@ document.addEventListener('newline', function (e) {
 tasks = {
   add     : function (newNode,event) {
   if(!(event instanceof MouseEvent)){
+    console.log('you hit return');
     this.array.splice(this.array.indexOf(event)+1,0,newNode)
-    return event
+    return newNode
   } else if(event instanceof MouseEvent) {
     this.array.push(newNode)-1;
     return newNode
@@ -59,8 +60,12 @@ tasks = {
 
 function add(event){
   // if(tasks.object)
+  if (!(event instanceof MouseEvent)){
 
-  tasks.update(tasks.add(new_entry(),event))
+    // event = event.nextSibling
+  }
+  console.log(event);
+  tasks.update(tasks.add(new_entry(), event))
 }
 
 function remove(){

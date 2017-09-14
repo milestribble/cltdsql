@@ -22,7 +22,7 @@ function createWindow () {
     protocol: 'file:',
     slashes: true
   }))
-  win.toggleDevTools();
+  // win.toggleDevTools();
   win.on('closed', () => {
     win = null
   })

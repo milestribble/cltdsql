@@ -10,7 +10,7 @@ function new_entry() {
 
       let range = document.createRange();
       let sel = window.getSelection();
-      range.setStart(entry.nextSibling.getElementsByClassName('task_entry')[0], 0);
+      range.setStart(entry.getElementsByClassName('task_entry')[0], 0);
       range.collapse(true);
       sel.removeAllRanges();
       sel.addRange(range);
