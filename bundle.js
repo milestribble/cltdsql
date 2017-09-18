@@ -10,14 +10,36 @@ const header_boiler = {
 
 let win
 //this: randomizes the background color on launch
-
-
 (function(){
   load_in().then(()=>update())
   let r = Math.floor(Math.random()*200)
   let g = Math.floor(Math.random()*200)
   let b = Math.floor(Math.random()*200)
-  document.body.style.backgroundColor = `rgba(${r},${g},${b},0.7)`
+  document.body.style.backgroundColor = `rgb(${r},${g},${b})`
+  document.getElementById('cover').style.backgroundColor = `rgb(${r},${g},${b})`
+  new Promise(function(resolve,reject){
+    let pos = 120
+    let title = document.getElementById('title')
+    let interval = setInterval(()=>{
+      pos-=1.2
+      title.style.paddingTop = pos.toString()+'vh'
+      if (pos<1){clearInterval(interval);
+        setTimeout(fade,500)
+      }
+    },
+      1)
+    let opacity = 1
+    let cover = document.getElementById('cover')
+    function fade(){
+      let interval = setInterval(()=>{
+        opacity-=.01
+        cover.style.opacity = opacity.toString()
+        if (opacity<.1){clearInterval(interval);
+        cover.style.display = 'none'}
+      },
+        5)
+    }
+  })
 }())
 
 //this: attaches click listeners to plus [add] and minus [remove] divs

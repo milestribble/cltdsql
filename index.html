@@ -12,8 +12,27 @@
         color: white;
         box-sizing: border-box;
       }
+      body{
+        overflow-y: hidden;
+      }
       .templates {
         display: none;
+      }
+      #cover {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        text-align: center;
+        justify-content: center;
+        top:0;
+        left:0;
+        font-size: 4em;
+      }
+      #title {
+        padding-top: 120vh;
+        font-family: AppleSDGothicNeo-ExtraBold;
       }
       #task_box {
         display: flex;
@@ -52,6 +71,9 @@
     </style>
   </head>
   <body>
+    <div id="cover">
+      <span id="title">Tasks</span>
+    </div>
     <div class="templates">
       <div class="task">
         <div class="task_toggle"></div>
