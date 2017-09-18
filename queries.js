@@ -3,7 +3,7 @@ const { Client } = require('pg')
 function query(statement){
   return new Promise(function(resolve,reject){
     client =  new Client({
-      user: 'learner',
+      user: 'Tim',
       host: 'localhost',
       database: 'cltdsql'
     })
@@ -18,7 +18,6 @@ function query(statement){
 function add_task(req){
   return new Promise( function (resolve,reject) {
     let above = 0, inside = 0;
-    console.log(1, req);
     if(req.db_id){
         query(`SELECT self, above, inside FROM tasks WHERE self = '${req.db_id}'`)
       .then((result)=>{
@@ -100,88 +99,38 @@ function refresh(task) {
         object[inside] = array;
       }
       return object
-  // { '0':
-  //  [ anonymous { self: 47, above: 0, inside: 0 },
-  //    anonymous { self: 46, above: 47, inside: 0 },
-  //    anonymous { self: 44, above: 46, inside: 0 },
-  //    anonymous { self: 45, above: 44, inside: 0 },
-  //    anonymous { self: 43, above: 45, inside: 0 },
-  //    anonymous { self: 42, above: 43, inside: 0 },
-  //    anonymous { self: 41, above: 42, inside: 0 },
-  //    anonymous { self: 40, above: 41, inside: 0 },
-  //    anonymous { self: 39, above: 40, inside: 0 },
-  //    anonymous { self: 38, above: 39, inside: 0 },
-  //    anonymous { self: 37, above: 38, inside: 0 },
-  //    anonymous { self: 36, above: 37, inside: 0 },
-  //    anonymous { self: 35, above: 36, inside: 0 },
-  //    anonymous { self: 34, above: 35, inside: 0 },
-  //    anonymous { self: 33, above: 34, inside: 0 },
-  //    anonymous { self: 32, above: 33, inside: 0 },
-  //    anonymous { self: 31, above: 32, inside: 0 },
-  //    anonymous { self: 30, above: 31, inside: 0 },
-  //    anonymous { self: 29, above: 30, inside: 0 },
-  //    anonymous { self: 28, above: 29, inside: 0 },
-  //    anonymous { self: 27, above: 28, inside: 0 },
-  //    anonymous { self: 26, above: 27, inside: 0 },
-  //    anonymous { self: 25, above: 26, inside: 0 },
-  //    anonymous { self: 24, above: 25, inside: 0 },
-  //    anonymous { self: 23, above: 24, inside: 0 },
-  //    anonymous { self: 20, above: 23, inside: 0 },
-  //    anonymous { self: 19, above: 20, inside: 0 },
-  //    anonymous { self: 18, above: 19, inside: 0 },
-  //    anonymous { self: 16, above: 18, inside: 0 },
-  //    anonymous { self: 15, above: 16, inside: 0 },
-  //    anonymous { self: 14, above: 15, inside: 0 },
-  //    anonymous { self: 13, above: 14, inside: 0 },
-  //    anonymous { self: 12, above: 13, inside: 0 },
-  //    anonymous { self: 10, above: 12, inside: 0 },
-  //    anonymous { self: 11, above: 10, inside: 0 },
-  //    anonymous { self: 9, above: 11, inside: 0 },
-  //    anonymous { self: 7, above: 9, inside: 0 },
-  //    anonymous { self: 6, above: 7, inside: 0 },
-  //    anonymous { self: 8, above: 6, inside: 0 },
-  //    anonymous { self: 5, above: 8, inside: 0 } ],
-  // '1':
-  //  [ anonymous { self: 17, above: 0, inside: 1 },
-  //    anonymous { self: 21, above: 17, inside: 1 },
-  //    anonymous { self: 22, above: 21, inside: 1 } ] }
     })
     .then((result)=>{
       let array = []
-      result[0]
+      let column = 0
+      tree(result[0])
       //start with result[0] <- order list of 0's children
-      //and pop() each task
-      //push task into array
-      //if task object has prop of task.self
-      //  recall this function for that array
-      //then continue moving down this list
+      function tree (tasks){
+        while(tasks.length>0){
+          let task = tasks.pop()
+          task.column = column
+          array.push(task)
+          if(result[task.self]){
+            column++
+            tree(result[task.self])
+            column--
+          }
+        }
+      }
+      array = array.map(el=>{return {id:el['self'],column:el['column']}})
+      resolve(array)
     })
-    // .catch((err)=>console.log('yelp, ',err))
+    .catch((err)=>reject(err))
   })
 }
 
-
-
-
-
-
-
-// function load(task) {
-//   return new Promise( function (resolve,reject) {
-//     let client = newClient()
-//     client.connect();
-//     if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(task.due)) {
-//       client.end();
-//       reject('Invalid date')
-//     }
-//     client.query(`SELECT id FROM tasks`,function(err, result) {
-//       if(err) reject('db Load error')//handle error
-//       else {
-//         resolve(result.rows);
-//       }
-//     });
-//   })
-// }
+function load(task) {
+  return new Promise( function (resolve,reject) {
+      query(`SELECT self, entry, due FROM tasks`)
+    .then((result)=>resolve(result.rows))
+    .catch((err)=>reject(err))
+  })
+}
 
 //
 // //{'task_id':80,'sib_id':81} where 80 has nothing//
@@ -345,7 +294,8 @@ function refresh(task) {
 module.exports = {
   add_task,
   change,
-  refresh
+  refresh,
+  load
   // add_sibling,
   // change_task,
   // remove_task,

@@ -1,9 +1,6 @@
-module.exports = {new_entry}
-
 //this: creates a new 'task' Node
 //returns: new 'task' with eventListeners in place
-
-function new_entry(crntTsk) {
+module.exports = function (crntTsk) {
   return new Promise(function (resolve, reject){
 
     //this: fetches a new task entry the db

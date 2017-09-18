@@ -21,7 +21,7 @@ routes.post('/refresh', function(req, res){
 })
 
 routes.post('/load', function(req, res){
-  queries.load(req.body).then((data)=>{console.log(data);return data}).then((data)=>res.json(data)).catch(err=>console.log('load',err))
+  queries.load().then((data)=>{console.log(data);return data}).then((data)=>res.json(data)).catch(err=>console.log('load',err))
 })
 
 

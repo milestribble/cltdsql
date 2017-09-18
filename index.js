@@ -1,4 +1,4 @@
-const {new_entry} = require('./templates.js')
+const new_entry = require('./templates.js')
 const header_boiler = {
   headers: {
    'Accept': 'application/json',
@@ -7,9 +7,16 @@ const header_boiler = {
  method: "POST"
 }
 
-let top_id, base_id;
+let win
 
+(function(){
+  fetch(`http://localhost:6050/load`,header_boiler)
+  .then(res => res.json())
+  .then(res => console.log(res))
+}())
 //this: randomizes the background color on launch
+let rain
+
 (function(){
   let r = Math.floor(Math.random()*200)
   let g = Math.floor(Math.random()*200)
@@ -42,11 +49,10 @@ document.addEventListener('newline', function (e) {
 }, false);
 
 function update (newNode) {
-    if (!(top_id)){top_id = newNode.id }
     let header = header_boiler
     fetch(`http://localhost:6050/refresh`,header)
     .then(res => res.json())
-    .then(db => {})
+    .then(db => {console.log(db);})
 }
 
 //this: envokes new_entry() from db and updates view

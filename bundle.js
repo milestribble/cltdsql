@@ -1,5 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-const {new_entry} = require('./templates.js')
+const new_entry = require('./templates.js')
 const header_boiler = {
   headers: {
    'Accept': 'application/json',
@@ -8,9 +8,16 @@ const header_boiler = {
  method: "POST"
 }
 
-let top_id, base_id;
+let win
 
+(function(){
+  fetch(`http://localhost:6050/load`,header_boiler)
+  .then(res => res.json())
+  .then(res => console.log(res))
+}())
 //this: randomizes the background color on launch
+let rain
+
 (function(){
   let r = Math.floor(Math.random()*200)
   let g = Math.floor(Math.random()*200)
@@ -43,11 +50,10 @@ document.addEventListener('newline', function (e) {
 }, false);
 
 function update (newNode) {
-    if (!(top_id)){top_id = newNode.id }
     let header = header_boiler
     fetch(`http://localhost:6050/refresh`,header)
     .then(res => res.json())
-    .then(db => {})
+    .then(db => {console.log(db);})
 }
 
 //this: envokes new_entry() from db and updates view
@@ -98,12 +104,9 @@ function change(node){
 }
 
 },{"./templates.js":2}],2:[function(require,module,exports){
-module.exports = {new_entry}
-
 //this: creates a new 'task' Node
 //returns: new 'task' with eventListeners in place
-
-function new_entry(crntTsk) {
+module.exports = function (crntTsk) {
   return new Promise(function (resolve, reject){
 
     //this: fetches a new task entry the db
