@@ -1,79 +1,97 @@
 const {new_entry} = require('./templates.js')
-const popout = new Event('popout')
-
-let exampleSocket = new WebSocket("ws://localhost:6050")
-setTimeout(function(){exampleSocket.send("Here's some text that the server is urgently awaiting!");}, 2000)
-exampleSocket.onmessage = function (event) {
-  console.log(event.data);
+const header_boiler = {
+  headers: {
+   'Accept': 'application/json',
+   'Content-Type': 'application/json'
+ },
+ method: "POST"
 }
 
-document.getElementsByClassName('footer')[0].children[1].addEventListener('click',add);
-document.getElementsByClassName('footer')[0].children[0].addEventListener('click',remove);
-document.addEventListener('pop_blur', function (e) {
-  save(e.detail);
-}, false);
-document.addEventListener('newline', function (e) {
+let top_id, base_id;
 
-  add(e.detail);
-  e.detail.getElementsByClassName('task_entry')[0].children[0].remove()
+//this: randomizes the background color on launch
+(function(){
+  let r = Math.floor(Math.random()*200)
+  let g = Math.floor(Math.random()*200)
+  let b = Math.floor(Math.random()*200)
+  document.body.style.backgroundColor = `rgba(${r},${g},${b},0.7)`
+}())
+
+//this: attaches click listeners to plus [add] and minus [remove] divs
+
+document.getElementsByClassName('footer')[0].children[1].addEventListener('click',add_task);
+document.getElementsByClassName('footer')[0].children[0].addEventListener('click',remove);
+
+//this: attaches pop_blur listener to the document
+//this: dispatched by event handler of a just-blurred task
+//handler: passes task reference from event detail to save() method
+
+document.addEventListener('pop_blur', function (e) {
+  change(e.detail)
+}, false);
+
+//this: attaches newline listener to the document
+//this: dispatched by event handler of a task in which the user hit 'return' [keyup]
+//handler: removes extra div created in task due to hitting 'return'
+//handler: removes underlines from task if non-toggled
+//handler: triggers the creation of a new task and passes ref to triggering task
+
+document.addEventListener('newline', function (e) {
+  add_task(e.detail);
   e.detail.getElementsByClassName('task_entry')[0].classList.remove('task_entry_bold');
 }, false);
 
-tasks = {
-  add     : function (newNode,event) {
-  if(!(event instanceof MouseEvent)){
-    console.log('you hit return');
-    this.array.splice(this.array.indexOf(event)+1,0,newNode)
-    return newNode
-  } else if(event instanceof MouseEvent) {
-    this.array.push(newNode)-1;
-    return newNode
-    }
-  },
-  update  : function (event) {
-    document.getElementById('stuff').innerHTML = '';
-    this.array.forEach((el,index)=>{
-      document.getElementById('stuff').appendChild(el).focus()
-
-    })
-    if(event){
-      console.log(event);
-      event.getElementsByClassName('task_entry')[0].dispatchEvent(new Event('bounce'))
-
-    }
-
-  },
-  remove  : function () {
-    this.array = this.array.filter((el)=>{
-      if(el instanceof HTMLDivElement){
-          if(el.getElementsByClassName('task_toggle')[0].classList.contains('task_toggle_bold')){
-            return false
-          }return true
-      } else {
-        this(el)
-        return true
-      }
-    })
-  },
-  array   : []
-};
-
-function add(event){
-  // if(tasks.object)
-  if (!(event instanceof MouseEvent)){
-
-    // event = event.nextSibling
-  }
-  console.log(event);
-  tasks.update(tasks.add(new_entry(), event))
+function update (newNode) {
+    if (!(top_id)){top_id = newNode.id }
+    let header = header_boiler
+    fetch(`http://localhost:6050/refresh`,header)
+    .then(res => res.json())
+    .then(db => {})
 }
+
+//this: envokes new_entry() from db and updates view
+
+function add_task(crntTsk){
+
+    new_entry(crntTsk instanceof MouseEvent ? undefined : crntTsk)
+    .then ((newNode)=>{
+      document.getElementById('task_box').append(newNode)
+      update(newNode);
+      newNode.getElementsByClassName('task_entry')[0].dispatchEvent(new Event('bounce'))
+    })
+}
+
+
+//this: envokes task.remove
+//this: envokes task.update
 
 function remove(){
-  tasks.remove()
-  tasks.update()
+  toggled = document.getElementsByClassName('task_toggle_bold')
+  toggled = (function(){
+    let array = []
+    for (let i=0; i<toggled.length; i++){
+      array.push(toggled[i].parentElement)
+    }
+    return array
+  }())
+  toggled.reduce((cum,node)=>{
+    return cum.then(()=>new Promise( function (resolution, rejection){
+      let header = header_boiler
+      header.body = JSON.stringify({'id':node.db_id,'next':node.db_next,'child':node.db_child})
+      fetch(`http://localhost:6050/remove_task`,header)
+      .then(res => res.json())
+      .then(res => resolution(res))
+    }))
+  },Promise.resolve()).then(()=>{console.log('yo');toggled.forEach((el)=>el.remove())});
 }
 
-function save(node){
-  // console.log(node.getElementsByClassName('task_entry')[0].innerText);
+//this: notifies app.js about a tasks' creation, modification, or removal
+
+function change(node){
+  let header = header_boiler
+  let innerText = node.getElementsByClassName('task_entry')[0].innerText.trimRight()
+  header.body = JSON.stringify({'id':node.id,'entry':innerText,'status':node.db_status,'due':node.db_due })
+  fetch(`http://localhost:6050/change`,header)
+  .then(res => res.json())
+  .then(res => console.log('change', res))
 }
-add()
