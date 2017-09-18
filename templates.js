@@ -1,31 +1,53 @@
 //this: creates a new 'task' Node
 //returns: new 'task' with eventListeners in place
-module.exports = function (crntTsk) {
+module.exports = {load_in, new_entry}
+
+const header_boiler = {
+  headers: {
+   'Accept': 'application/json',
+   'Content-Type': 'application/json'
+ },
+ method: "POST"
+}
+
+function new_entry (crntTsk) {
   return new Promise(function (resolve, reject){
 
     //this: fetches a new task entry the db
     //this: sets the new task's 'savestatus' property as 'unsaved'
-    let header = {
-      headers: {
-       'Accept': 'application/json',
-       'Content-Type': 'application/json'
-     },
-     method: "POST"
-    }
+    let header = header_boiler
     crntTsk ? console.log(crntTsk.id):undefined;
     crntTsk ? header.body = JSON.stringify({db_id:crntTsk.id}): undefined
     fetch(`http://localhost:6050/add`,header)
     .then(res => res.json())
-    .then(db => {
+    .then(new_entry => resolve(make_task(new_entry)))
+    .catch(function(res){ console.log(res) });
+  })
+}
+
+function load_in (){
+  return new Promise(function(resolve, reject){
+    fetch(`http://localhost:6050/load`,header_boiler)
+    .then(res => res.json())
+    .then(res => {
+      res.forEach((entry)=>{
+        document.getElementById('task_box').append(make_task(entry))
+      })
+      resolve()
+    })
+    .catch(err=>reject(err))
+  })
+}
+
+function make_task(prompt){
       //this: clones entry template into a new 'task' Node
       //this: sets the new task's db stati
 
       let entry = document.getElementsByClassName('task')[0].cloneNode(true);
-      entry.id=db.self
-      entry.db_due=db.due
-      entry.db_status=db.status
-      entry.db_above=db.above
-      entry.db_inside=db.inside
+      entry.id=prompt.self
+      entry.db_due=prompt.due
+      entry.db_status=prompt.status
+      entry.getElementsByClassName('task_entry')[0].innerText=prompt.entry
 
       //this: attaches bounce listener to new task
       //this: dispatched by task.update()
@@ -83,7 +105,5 @@ module.exports = function (crntTsk) {
 
       //this: returns the new task Node
 
-      resolve(entry);})
-    .catch(function(res){ console.log(res) });
- })
+      return entry
 }

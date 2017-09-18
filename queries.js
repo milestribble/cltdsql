@@ -27,11 +27,11 @@ function add_task(req){
       .then(go).catch(err=>{throw new Error('queries.js>add_task>if(req): ' + err.message)})
     }else{go()}
     function  go (){
-      query(`INSERT INTO tasks ( status, due ) VALUES ('waiting', '2000-01-01' ) RETURNING *`)
+      query(`INSERT INTO tasks ( entry, status, due ) VALUES ('', 'waiting', '2000-01-01' ) RETURNING *`)
     .then((result)=>
       move(result.rows[0].self,above,inside))
     .then((db_id)=>
-      query(`SELECT self, above, inside, status, due FROM tasks WHERE self = '${db_id}'`))
+      query(`SELECT self, entry, above, inside, status, due FROM tasks WHERE self = '${db_id}'`))
     .then((result)=>
       resolve(result.rows[0]))
     .catch(err=>{throw new Error('queries.js>add_task>go(): ',err.message)})
@@ -126,7 +126,7 @@ function refresh(task) {
 
 function load(task) {
   return new Promise( function (resolve,reject) {
-      query(`SELECT self, entry, due FROM tasks`)
+      query(`SELECT self, entry, due, status FROM tasks`)
     .then((result)=>resolve(result.rows))
     .catch((err)=>reject(err))
   })

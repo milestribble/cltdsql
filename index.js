@@ -1,4 +1,4 @@
-const new_entry = require('./templates.js')
+const {new_entry, load_in} = require('./templates.js')
 const header_boiler = {
   headers: {
    'Accept': 'application/json',
@@ -8,16 +8,11 @@ const header_boiler = {
 }
 
 let win
-
-(function(){
-  fetch(`http://localhost:6050/load`,header_boiler)
-  .then(res => res.json())
-  .then(res => console.log(res))
-}())
 //this: randomizes the background color on launch
-let rain
+
 
 (function(){
+  load_in().then(()=>update())
   let r = Math.floor(Math.random()*200)
   let g = Math.floor(Math.random()*200)
   let b = Math.floor(Math.random()*200)
@@ -48,11 +43,18 @@ document.addEventListener('newline', function (e) {
   e.detail.getElementsByClassName('task_entry')[0].classList.remove('task_entry_bold');
 }, false);
 
-function update (newNode) {
+function update () {
     let header = header_boiler
     fetch(`http://localhost:6050/refresh`,header)
     .then(res => res.json())
-    .then(db => {console.log(db);})
+    .then(db => {
+      let order = 1
+      db.forEach(function(el){
+          document.getElementById(el.id).style.order = order
+          order++
+      })
+    })
+    .catch(err=>console.log(err))
 }
 
 //this: envokes new_entry() from db and updates view
